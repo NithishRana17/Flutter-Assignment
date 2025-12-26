@@ -105,7 +105,7 @@ flutter run -d chrome
 
 ### Android Emulator
 ```bash
-flutter run -d emulator-5554
+flutter run -d emulator-0001
 ```
 
 ### Web (Edge/Chrome)
