@@ -1,4 +1,4 @@
-# Logbook Lite ✈️
+# LogBook Lite ✈️
 
 A modern, offline-first pilot logbook application built with Flutter. Track your flights, sync across devices, and get AI-powered flight analysis from Captain MAVE.
 
@@ -6,6 +6,45 @@ A modern, offline-first pilot logbook application built with Flutter. Track your
 ![Dart](https://img.shields.io/badge/Dart-3.0+-blue)
 ![Supabase](https://img.shields.io/badge/Backend-Supabase-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+
+---
+
+## 🎯 Quick Start for Interviewers
+
+**Try this app on your device in under 5 minutes:**
+
+### Option 1: Run on Android Device
+```bash
+# 1. Clone the repository
+git clone https://github.com/NithishRana17/Flutter-Assignment.git
+cd Flutter-Assignment
+
+# 2. Install dependencies
+flutter pub get
+
+# 3. Create environment file (for AI features)
+cp .env.example .env
+# Edit .env and add your Gemini API key (optional - app works without it)
+
+# 4. Connect your Android device (USB debugging enabled) and run
+flutter run
+```
+
+### Option 2: Run on Web (Chrome/Edge)
+```bash
+git clone https://github.com/NithishRana17/Flutter-Assignment.git
+cd Flutter-Assignment
+flutter pub get
+flutter run -d chrome
+```
+
+### Demo Account
+- Create a new account with your email, or
+- Test with your own Supabase backend (see Backend Configuration below)
+
+> **Note:** The Supabase backend is already configured. Just clone and run!
+
+---
 
 ## ✨ Features
 

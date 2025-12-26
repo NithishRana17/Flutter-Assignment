@@ -153,15 +153,15 @@ class _LogbookListScreenState extends ConsumerState<LogbookListScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      if (logbookState.filterFlightType != null)
-                        _FilterChip(
-                          label: logbookState.filterFlightType!,
-                          onRemove: () {
-                            ref
-                                .read(logbookNotifierProvider(widget.userId).notifier)
-                                .setFlightTypeFilter(null);
-                          },
-                        ),
+                      // Display each selected flight type as a chip
+                      ...logbookState.filterFlightTypes.map((type) => _FilterChip(
+                        label: type,
+                        onRemove: () {
+                          ref
+                              .read(logbookNotifierProvider(widget.userId).notifier)
+                              .toggleFlightTypeFilter(type);
+                        },
+                      )),
                       if (logbookState.filterStartDate != null)
                         _FilterChip(
                           label: '${DateTimeUtils.formatDate(logbookState.filterStartDate!)} - ${DateTimeUtils.formatDate(logbookState.filterEndDate!)}',
@@ -250,7 +250,7 @@ class _LogbookListScreenState extends ConsumerState<LogbookListScreen> {
   }
 
   bool _hasActiveFilters(LogbookState state) {
-    return state.filterFlightType != null ||
+    return state.filterFlightTypes.isNotEmpty ||
         state.filterStartDate != null ||
         state.filterEndDate != null;
   }
@@ -598,14 +598,14 @@ class _FilterBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _FilterBottomSheetState extends ConsumerState<_FilterBottomSheet> {
-  String? _selectedFlightType;
+  List<String> _selectedFlightTypes = []; // Changed to List for multi-select
   DateTimeRange? _dateRange;
 
   @override
   void initState() {
     super.initState();
     final state = ref.read(logbookNotifierProvider(widget.userId));
-    _selectedFlightType = state.filterFlightType;
+    _selectedFlightTypes = List<String>.from(state.filterFlightTypes);
     if (state.filterStartDate != null && state.filterEndDate != null) {
       _dateRange = DateTimeRange(
         start: state.filterStartDate!,
@@ -640,7 +640,7 @@ class _FilterBottomSheetState extends ConsumerState<_FilterBottomSheet> {
 
   void _applyFilters() {
     final notifier = ref.read(logbookNotifierProvider(widget.userId).notifier);
-    notifier.setFlightTypeFilter(_selectedFlightType);
+    notifier.setFlightTypeFilters(_selectedFlightTypes);
     notifier.setDateRangeFilter(_dateRange?.start, _dateRange?.end);
     widget.onApply();
   }
@@ -665,7 +665,7 @@ class _FilterBottomSheetState extends ConsumerState<_FilterBottomSheet> {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    _selectedFlightType = null;
+                    _selectedFlightTypes = [];
                     _dateRange = null;
                   });
                 },
@@ -675,9 +675,9 @@ class _FilterBottomSheetState extends ConsumerState<_FilterBottomSheet> {
           ),
           const SizedBox(height: 24),
 
-          // Flight Type
+          // Flight Type (multi-select)
           Text(
-            'Flight Type',
+            'Flight Type (select multiple)',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
@@ -685,13 +685,17 @@ class _FilterBottomSheetState extends ConsumerState<_FilterBottomSheet> {
             spacing: 8,
             runSpacing: 8,
             children: AppConstants.flightTypes.map((type) {
-              final isSelected = _selectedFlightType == type;
+              final isSelected = _selectedFlightTypes.contains(type);
               return FilterChip(
                 label: Text(type),
                 selected: isSelected,
                 onSelected: (selected) {
                   setState(() {
-                    _selectedFlightType = selected ? type : null;
+                    if (selected) {
+                      _selectedFlightTypes.add(type);
+                    } else {
+                      _selectedFlightTypes.remove(type);
+                    }
                   });
                 },
                 selectedColor: AppColors.primary.withOpacity(0.2),

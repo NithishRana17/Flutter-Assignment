@@ -361,7 +361,7 @@ class LogbookState {
   final bool isLoading;
   final String? errorMessage;
   final String? searchQuery;
-  final String? filterFlightType;
+  final List<String> filterFlightTypes; // Changed to List for multi-select
   final DateTime? filterStartDate;
   final DateTime? filterEndDate;
 
@@ -370,7 +370,7 @@ class LogbookState {
     this.isLoading = false,
     this.errorMessage,
     this.searchQuery,
-    this.filterFlightType,
+    this.filterFlightTypes = const [], // Default to empty list
     this.filterStartDate,
     this.filterEndDate,
   });
@@ -380,7 +380,7 @@ class LogbookState {
     bool? isLoading,
     String? errorMessage,
     String? searchQuery,
-    String? filterFlightType,
+    List<String>? filterFlightTypes,
     DateTime? filterStartDate,
     DateTime? filterEndDate,
     bool clearFilters = false,
@@ -393,7 +393,7 @@ class LogbookState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       searchQuery: clearFilters || clearSearchQuery ? null : (searchQuery ?? this.searchQuery),
-      filterFlightType: clearFilters || clearFlightTypeFilter ? null : (filterFlightType ?? this.filterFlightType),
+      filterFlightTypes: clearFilters || clearFlightTypeFilter ? [] : (filterFlightTypes ?? this.filterFlightTypes),
       filterStartDate: clearFilters || clearDateFilter ? null : (filterStartDate ?? this.filterStartDate),
       filterEndDate: clearFilters || clearDateFilter ? null : (filterEndDate ?? this.filterEndDate),
     );
@@ -412,9 +412,10 @@ class LogbookState {
           e.arrIcao.toLowerCase().contains(query)).toList();
     }
 
-    // Apply flight type filter
-    if (filterFlightType != null) {
-      result = result.where((e) => e.flightType.contains(filterFlightType)).toList();
+    // Apply flight type filter (matches ANY of the selected types)
+    if (filterFlightTypes.isNotEmpty) {
+      result = result.where((e) => 
+          filterFlightTypes.any((type) => e.flightType.contains(type))).toList();
     }
 
     // Apply date range filter
@@ -607,13 +608,20 @@ class LogbookNotifier extends StateNotifier<LogbookState> {
     }
   }
 
-  /// Set flight type filter
-  void setFlightTypeFilter(String? flightType) {
-    if (flightType == null) {
-      state = state.copyWith(clearFlightTypeFilter: true);
+  /// Toggle flight type filter (multi-select: adds or removes type from list)
+  void toggleFlightTypeFilter(String flightType) {
+    final currentTypes = List<String>.from(state.filterFlightTypes);
+    if (currentTypes.contains(flightType)) {
+      currentTypes.remove(flightType);
     } else {
-      state = state.copyWith(filterFlightType: flightType);
+      currentTypes.add(flightType);
     }
+    state = state.copyWith(filterFlightTypes: currentTypes);
+  }
+
+  /// Set all flight type filters at once
+  void setFlightTypeFilters(List<String> flightTypes) {
+    state = state.copyWith(filterFlightTypes: flightTypes);
   }
 
   /// Set date range filter
