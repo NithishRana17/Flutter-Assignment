@@ -66,7 +66,7 @@ A modern, offline-first pilot logbook application built with Flutter. Track your
 
 ### Android Emulator
 ```bash
-flutter run -d emulator-5554
+flutter run -d emulator-0001
 ```
 
 ### Web (Edge/Chrome)
